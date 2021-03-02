@@ -2,7 +2,7 @@
 
 # asdf-swiftformat ![Build](https://github.com/younke/asdf-swiftformat/workflows/Build/badge.svg) ![Lint](https://github.com/younke/asdf-swiftformat/workflows/Lint/badge.svg)
 
-[swiftformat](https://github.com/nicklockwood/SwiftFormat) plugin for the [asdf version manager](https://asdf-vm.com).
+[SwiftFormat](https://github.com/nicklockwood/SwiftFormat) plugin for the [asdf version manager](https://asdf-vm.com).
 
 </div>
 
@@ -16,8 +16,7 @@
 
 # Dependencies
 
-- `bash`, `curl`, `tar`: generic POSIX utilities.
-- `SOME_ENV_VAR`: set this environment variable in your shell config to load the correct version of tool x.
+- `bash`, `curl`, `zip`: generic POSIX utilities.
 
 # Install
 
@@ -26,7 +25,7 @@ Plugin:
 ```shell
 asdf plugin add swiftformat
 # or
-asdf plugin add https://github.com/younke/asdf-swiftformat.git
+asdf plugin add swiftformat https://github.com/younke/asdf-swiftformat.git
 ```
 
 swiftformat:
