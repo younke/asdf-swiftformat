@@ -11,6 +11,19 @@ fail() {
   exit 1
 }
 
+case "$OSTYPE" in
+darwin*)
+  SRC_NAME="swiftformat"
+  ;;
+linux*)
+  SRC_NAME="swiftformat_linux"
+  ;;
+*)
+  echo "Unsupported OS: $OSTYPE"
+  exit 1
+  ;;
+esac
+
 curl_opts=(-fsSL)
 
 if [ -n "${GITHUB_API_TOKEN:-}" ]; then
@@ -37,7 +50,7 @@ download_release() {
   version="$1"
   filename="$2"
 
-  url="$GH_REPO/releases/download/${version}/swiftformat.zip"
+  url="$GH_REPO/releases/download/${version}/$SRC_NAME.zip"
 
   echo "* Downloading $TOOL_NAME release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
@@ -61,6 +74,11 @@ install_version() {
 
     local tool_cmd
     tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
+
+    if [ "$SRC_NAME" != "$tool_cmd" ]; then
+      mv "$install_path/bin/$SRC_NAME" "$install_path/bin/$tool_cmd"
+    fi
+
     test -x "$install_path/bin/$tool_cmd" || fail "Expected $install_path/bin/$tool_cmd to be executable."
 
     echo "$TOOL_NAME $version installation was successful!"
