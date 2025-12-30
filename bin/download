@@ -10,7 +10,6 @@ source "${plugin_dir}/lib/utils.bash"
 
 mkdir -p "$ASDF_DOWNLOAD_PATH"
 
-binary_name="$(get_binary_name)"
 release_file="$ASDF_DOWNLOAD_PATH/$TOOL_NAME-$ASDF_INSTALL_VERSION.zip"
 
 download_release "$ASDF_INSTALL_VERSION" "$release_file"

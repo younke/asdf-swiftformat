@@ -30,17 +30,25 @@ get_platform() {
 	esac
 }
 
-# Returns the binary name for the current platform
+# Returns the binary name for the current platform and architecture
 get_binary_name() {
-	local platform
+	local platform arch
 	platform="$(get_platform)"
+	arch="$(uname -m)"
 
 	case "$platform" in
 	macos)
 		echo "swiftformat"
 		;;
 	linux)
-		echo "swiftformat_linux"
+		case "$arch" in
+		aarch64)
+			echo "swiftformat_linux_aarch64"
+			;;
+		*)
+			echo "swiftformat_linux"
+			;;
+		esac
 		;;
 	esac
 }

@@ -30,4 +30,4 @@ jobs:
         with:
           install: false
 
-      - run: mise exec asdf:https://github.com/younke/asdf-swiftformat@master -- swiftformat --help
+      - run: mise exec asdf:https://github.com/younke/asdf-swiftformat@latest -- swiftformat --help
