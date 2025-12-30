@@ -1,0 +1,33 @@
+name: mise
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  schedule:
+    - cron: 0 0 * * 5
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  test:
+    name: mise test (${{ matrix.os }})
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: false
+
+      - run: mise exec asdf:https://github.com/younke/asdf-swiftformat@latest -- swiftformat --help
