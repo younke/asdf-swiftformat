@@ -7,83 +7,102 @@ TOOL_NAME="swiftformat"
 TOOL_TEST="swiftformat --help"
 
 fail() {
-  echo -e "asdf-$TOOL_NAME: $*"
-  exit 1
+	echo -e "asdf-$TOOL_NAME: $*"
+	exit 1
 }
 
-case "$OSTYPE" in
-darwin*)
-  SRC_NAME="swiftformat"
-  ;;
-linux*)
-  SRC_NAME="swiftformat_linux"
-  ;;
-*)
-  echo "Unsupported OS: $OSTYPE"
-  exit 1
-  ;;
-esac
+# Detect platform and return download details
+# Returns: "macos" | "linux" or fails
+get_platform() {
+	local kernel
+	kernel="$(uname -s)"
+
+	case "$kernel" in
+	Darwin)
+		echo "macos"
+		;;
+	Linux)
+		echo "linux"
+		;;
+	*)
+		fail "Unsupported OS: $kernel"
+		;;
+	esac
+}
+
+# Returns the binary name for the current platform
+get_binary_name() {
+	local platform
+	platform="$(get_platform)"
+
+	case "$platform" in
+	macos)
+		echo "swiftformat"
+		;;
+	linux)
+		echo "swiftformat_linux"
+		;;
+	esac
+}
 
 curl_opts=(-fsSL)
 
-if [ -n "${GITHUB_API_TOKEN:-}" ]; then
-  curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
+if [ -n "${GITHUB_TOKEN:-}" ]; then
+	curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_TOKEN")
 fi
 
 sort_versions() {
-  sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
-    LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
+	sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
+		LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
 }
 
 list_github_tags() {
-  git ls-remote --tags --refs "$GH_REPO" |
-    grep -o 'refs/tags/.*' | cut -d/ -f3- |
-    sed 's/^v//'
+	git ls-remote --tags --refs "$GH_REPO" |
+		grep -o 'refs/tags/.*' | cut -d/ -f3- |
+		sed 's/^v//'
 }
 
 list_all_versions() {
-  list_github_tags
+	list_github_tags
 }
 
 download_release() {
-  local version filename url
-  version="$1"
-  filename="$2"
+	local version filename url binary_name
+	version="$1"
+	filename="$2"
+	binary_name="$(get_binary_name)"
 
-  url="$GH_REPO/releases/download/${version}/$SRC_NAME.zip"
+	url="$GH_REPO/releases/download/${version}/${binary_name}.zip"
 
-  echo "* Downloading $TOOL_NAME release $version..."
-  curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
+	echo "* Downloading $TOOL_NAME release $version..."
+	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
 
 install_version() {
-  local install_type="$1"
-  local version="$2"
-  local install_path="$3"
+	local install_type="$1"
+	local version="$2"
+	local install_path="${3%/bin}/bin"
 
-  if [ "$install_type" != "version" ]; then
-    fail "asdf-$TOOL_NAME supports release installs only"
-  fi
+	if [ "$install_type" != "version" ]; then
+		fail "asdf-$TOOL_NAME supports release installs only"
+	fi
 
-  local release_file="$install_path/$TOOL_NAME-$version.tar.gz"
-  (
-    mkdir -p "$install_path"
-    download_release "$version" "$release_file"
-    unzip $release_file -d "${install_path}/bin" || fail "Could not extract $release_file"
-    rm "$release_file"
+	(
+		mkdir -p "$install_path"
 
-    local tool_cmd
-    tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
+		local binary_name
+		binary_name="$(get_binary_name)"
 
-    if [ "$SRC_NAME" != "$tool_cmd" ]; then
-      mv "$install_path/bin/$SRC_NAME" "$install_path/bin/$tool_cmd"
-    fi
+		# Copy binary from download path
+		cp "${ASDF_DOWNLOAD_PATH}/${binary_name}" "$install_path/${TOOL_NAME}"
 
-    test -x "$install_path/bin/$tool_cmd" || fail "Expected $install_path/bin/$tool_cmd to be executable."
+		local tool_cmd
+		tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
+		test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
 
-    echo "$TOOL_NAME $version installation was successful!"
-  ) || (
-    rm -rf "$install_path"
-    fail "An error ocurred while installing $TOOL_NAME $version."
-  )
+		echo "$TOOL_NAME $version installation was successful!"
+	) || (
+		rm -rf "$install_path"
+		fail "An error occurred while installing $TOOL_NAME $version."
+	)
 }
