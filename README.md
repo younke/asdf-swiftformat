@@ -1,6 +1,8 @@
 <div align="center">
 
-# asdf-swiftformat ![Build](https://github.com/younke/asdf-swiftformat/workflows/Build/badge.svg) ![Lint](https://github.com/younke/asdf-swiftformat/workflows/Lint/badge.svg)
+# asdf-swiftformat
+
+[![asdf](https://github.com/younke/asdf-swiftformat/actions/workflows/build.yml/badge.svg)](https://github.com/younke/asdf-swiftformat/actions/workflows/build.yml) [![Lint](https://github.com/younke/asdf-swiftformat/actions/workflows/lint.yml/badge.svg)](https://github.com/younke/asdf-swiftformat/actions/workflows/lint.yml) [![mise](https://github.com/younke/asdf-swiftformat/actions/workflows/test-mise.yml/badge.svg)](https://github.com/younke/asdf-swiftformat/actions/workflows/test-mise.yml)
 
 [SwiftFormat](https://github.com/nicklockwood/SwiftFormat) plugin for the [asdf version manager](https://asdf-vm.com).
 
